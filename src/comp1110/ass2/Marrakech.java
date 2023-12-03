@@ -1,6 +1,32 @@
 package comp1110.ass2;
 
+import java.util.concurrent.ThreadLocalRandom;
+
+
+
 public class Marrakech {
+    private int numberOfPlayers;
+    private Player[] currentPlayers;
+    private int currentTurn;
+
+    private Board board;
+
+    public Marrakech(String gameState) {
+
+
+    }
+
+
+    /**
+     * Constructor for initial Marrakech object used for the Setup
+     * @param numberOfPlayers
+     * @param numberOfAI
+     */
+    public Marrakech(int numberOfPlayers, int numberOfAI) {
+        this.numberOfPlayers = numberOfPlayers + numberOfAI;
+        this.currentPlayers = new Player[this.numberOfPlayers];
+        this.currentTurn = 0;
+    }
 
     /**
      * Determine whether a rug String is valid.
@@ -23,8 +49,12 @@ public class Marrakech {
      * @return true if the rug is valid, and false otherwise.
      */
     public static boolean isRugValid(String gameString, String rug) {
+        if (rug.length() != 7) {
+            return false;
+        }
+
         // FIXME: Task 4
-        return false;
+        return true;
     }
 
     /**
@@ -42,8 +72,17 @@ public class Marrakech {
      * @return The result of the roll of the die meeting the criteria above
      */
     public static int rollDie() {
-        // FIXME: Task 6
-        return -1;
+        int randomNum = ThreadLocalRandom.current().nextInt(1, 7);
+        int dieRoll;
+        switch (randomNum) {
+            case 1: dieRoll = 1; break;
+            case 2: case 3: dieRoll = 2; break;
+            case 4: case 5: dieRoll = 3; break;
+            case 6: dieRoll = 4; break;
+            default: return -1;
+        }
+
+        return dieRoll;
     }
 
     /**
@@ -55,6 +94,12 @@ public class Marrakech {
      * @return true if the game is over, or false otherwise.
      */
     public static boolean isGameOver(String currentGame) {
+        Marrakech marrakech = new Marrakech(currentGame);
+        return marrakech.isGameOver();
+        // FIXME: Task 8
+    }
+
+    public boolean isGameOver() {
         // FIXME: Task 8
         return false;
     }
@@ -73,8 +118,15 @@ public class Marrakech {
      * rotation is illegal.
      */
     public static String rotateAssam(String currentAssam, int rotation) {
-        // FIXME: Task 9
-        return "";
+        if (!Assam.isAssamRotationValid(currentAssam,rotation)) {
+            return currentAssam;
+        }
+        Assam assam = new Assam(currentAssam);
+        Direction currentDirection = assam.getDirection();
+        int newAngle = currentDirection.getValue() + rotation;
+        Direction newDirection = Direction.getDirection(newAngle);
+        assam.setDirection(newDirection);
+        return assam.toString();
     }
 
     /**
@@ -104,6 +156,13 @@ public class Marrakech {
      * @return The amount of payment due, as an integer.
      */
     public static int getPaymentAmount(String gameString) {
+        Marrakech marrakech = new Marrakech(gameString);
+        return marrakech.getPaymentAmount();
+        // FIXME: Task 11
+
+    }
+
+    public int getPaymentAmount() {
         // FIXME: Task 11
         return -1;
     }
@@ -123,7 +182,11 @@ public class Marrakech {
      * @return A char representing the winner of the game as described above.
      */
     public static char getWinner(String gameState) {
-        // FIXME: Task 12
+        if (!isGameOver(gameState)) {
+            return 'n';
+        }
+
+
         return '\0';
     }
 
