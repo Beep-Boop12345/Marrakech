@@ -59,6 +59,14 @@ public class Assam {
     }
 
     /**
+     * Constructor for a new assam object at the beginning of the game
+     */
+    public Assam() {
+        this.position = new IntPair(3,3);
+        this.facing = Direction.NORTH;
+    }
+
+    /**
      * Checks if a given rotation is valid.
      * A rotation is valid if it is a 90 degree rotation left or right but not a 180 degree rotation.
      * @param assamString the current Assam its position and rotation
@@ -94,13 +102,134 @@ public class Assam {
     }
 
     public void moveAssam(int steps) {
-
+        // Attempt to translate assam based on how many moves and direction it is facing
+        IntPair translated = this.position.translate(steps, this.facing);
+        // If the translation is within the board it is accepted
+        if (translated.withinBoard()) {
+            this.position = translated;
+        } else {
+            /*If the attempted translation is not within the
+             board than a shuffle needs to take place  */
+            shuffle(steps);
+        }
     }
 
+
+    /**
+     * If a translation requires using shuffling on the edges of the board, this method updates assam's direction
+     * and IntPair based on the specifications
+     */
+    public void shuffle(int steps) {
+        IntPair currentPosition = this.position;
+        int offset = 0;
+        IntPair shuffledStart;
+        IntPair shuffled;
+        switch (this.facing) {
+            case NORTH:
+                offset = steps - currentPosition.getY() - 1;
+                switch (currentPosition.getX()) {
+                    case 6:
+                        shuffledStart = new IntPair(6,0);
+                        shuffled = shuffledStart.translate(offset,Direction.WEST);
+                        this.position = shuffled;
+                        this.facing = Direction.WEST;
+                        break;
+                    default:
+                        int startX = currentPosition.getX() % 2 == 0 ? currentPosition.getX() + 1 : currentPosition.getX() - 1;
+                        shuffledStart = new IntPair(startX,0);
+                        shuffled = shuffledStart.translate(offset,Direction.SOUTH);
+                        this.position = shuffled;
+                        this.facing = Direction.SOUTH;
+                        break;
+                }
+                break;
+            case SOUTH:
+                offset = steps + currentPosition.getY() - 7;
+                switch (currentPosition.getX()) {
+                    case 0:
+                        shuffledStart = new IntPair(0,6);
+                        shuffled = shuffledStart.translate(offset,Direction.EAST);
+                        this.position = shuffled;
+                        this.facing = Direction.EAST;
+                        break;
+                    default:
+                        int startX = currentPosition.getX() % 2 == 1 ? currentPosition.getX() + 1 : currentPosition.getX() - 1;
+                        shuffledStart = new IntPair(startX, 6);
+                        shuffled = shuffledStart.translate(offset,Direction.NORTH);
+                        this.position = shuffled;
+                        this.facing = Direction.NORTH;
+                        break;
+                }
+                break;
+            case EAST:
+                offset = steps + currentPosition.getX() - 7;
+                switch (currentPosition.getY()) {
+                    case 0:
+                        shuffledStart = new IntPair(6,0);
+                        shuffled = shuffledStart.translate(offset,Direction.SOUTH);
+                        this.position = shuffled;
+                        this.facing = Direction.SOUTH;
+                        break;
+                    default:
+                        int startY = currentPosition.getY() % 2 == 1 ? currentPosition.getY() + 1 : currentPosition.getY() - 1;
+                        shuffledStart = new IntPair(6,startY);
+                        shuffled = shuffledStart.translate(offset,Direction.WEST);
+                        this.position = shuffled;
+                        this.facing = Direction.WEST;
+                break;
+        }
+                break;
+            case WEST:
+                offset = steps - currentPosition.getX() - 1 ;
+                switch (currentPosition.getY()) {
+                    case 6:
+                        shuffledStart = new IntPair(0,6);
+                        shuffled = shuffledStart.translate(offset,Direction.NORTH);
+                        this.position = shuffled;
+                        this.facing = Direction.NORTH;
+                        break;
+                    default:
+                        int startY = currentPosition.getY() % 2 == 0 ? currentPosition.getY() + 1 : currentPosition.getY() - 1;
+                        shuffledStart = new IntPair(0,startY);
+                        shuffled = shuffledStart.translate(offset,Direction.EAST);
+                        this.position = shuffled;
+                        this.facing = Direction.EAST;
+                        break;
+                }
+                break;
+        }
+    }
+
+    public Boolean isAdjacent(IntPair other) {
+        int assamX = this.position.getX();
+        int assamY = this.position.getY();
+
+        int xDistance = Math.abs(other.getX() - assamX);
+        int yDistance = Math.abs(other.getY() - assamY);
+
+        if (xDistance == 1 && yDistance == 1) {
+            return false;
+        } else if (xDistance == 1 || yDistance == 1) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public IntPair getPosition() {
+        return position;
+    }
 
     @Override
     public String toString() {
         return "A" + position.toString() + facing.toString();
+    }
+
+    public static void main(String[] args) {
+        Assam assam = new Assam();
+        assam.facing = Direction.EAST;
+        assam.position = new IntPair(2,0);
+        System.out.println(assam.toString());
     }
 
 }

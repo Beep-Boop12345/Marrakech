@@ -30,6 +30,7 @@ public enum Direction {
         return null;
     }
 
+
     public int getValue() {
         return value;
     }
@@ -46,7 +47,7 @@ public enum Direction {
             case WEST:
                 return "W";
             default:
-                return super.toString();
+                return "";
         }
     }
 }

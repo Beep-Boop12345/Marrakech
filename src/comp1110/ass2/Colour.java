@@ -24,6 +24,8 @@ public enum Colour {
         return null;
     }
 
+
+
     @Override
     public String toString() {
         if (this == null) {
@@ -31,4 +33,7 @@ public enum Colour {
         }
         return String.valueOf(colourChar);
     }
+
+
+
 }

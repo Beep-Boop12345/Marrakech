@@ -1,6 +1,8 @@
 package comp1110.ass2;
 
 
+import java.util.Objects;
+
 /**
  * This class is used for Rug Tiles on the board
  */
@@ -29,15 +31,20 @@ public class Tile {
         }
     }
 
+    public Tile(Colour colour, int id, boolean isOccupied) {
+        this.colour = colour;
+        this.id = id;
+        this.isOccupied = isOccupied;
+    }
+
     @Override
     public String toString() {
         if (!this.isOccupied) {
-            return "Empty";
+            return "n00";
         } else {
-            return "Colour " + this.colour + " id: " + this.id;
+            return colour.toString() + String.format("%02d", this.id);
         }
     }
-
 
     public Colour getColour() {
         return this.colour;
@@ -50,4 +57,6 @@ public class Tile {
     public boolean isOccupied() {
         return this.isOccupied;
     }
+
+
 }

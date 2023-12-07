@@ -1,5 +1,6 @@
 package comp1110.ass2;
 
+
 /**
  * This class is used to denote a Rug move that is attempted to be played
  */
@@ -25,4 +26,50 @@ public class Rug {
         this.head = new IntPair(rugString.substring(5,7));
     }
 
+
+    /**
+     * Check if a rugString is well-formed in terms of formatting
+     * 1. Starts with a colour char
+     * 2. The rest of the string are numbers that can be parsed
+     * @return true if its well formatted
+     */
+    public static boolean isRugStringWellFormed(String rugString) {
+        if (rugString.length() != 7) {
+            return false;
+        }
+
+        char colourChar = rugString.charAt(0);
+        if (colourChar != 'c' && colourChar != 'y' && colourChar != 'r' && colourChar != 'p') {
+            return false;
+        }
+
+        String numbersFromRug = rugString.substring(1);
+        for (int i = 0; i < numbersFromRug.length(); i++) {
+            char num = numbersFromRug.charAt(i);
+            if (!Character.isDigit(num)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+
+
+    public IntPair getTail() {
+        return tail;
+    }
+
+    public IntPair getHead() {
+        return head;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Colour getColour() {
+        return colour;
+    }
 }

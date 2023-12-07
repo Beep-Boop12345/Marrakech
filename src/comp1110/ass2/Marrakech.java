@@ -1,19 +1,100 @@
 package comp1110.ass2;
 
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 
 public class Marrakech {
+    private int currentTurn;
     private int numberOfPlayers;
     private Player[] currentPlayers;
-    private int currentTurn;
 
     private Board board;
 
+    private Assam assam;
+
+
+    private static boolean isStateStringWellFormed(String gameState) {
+        final int playerStringLength = 8;
+        final int boardStringLength = 3 * 49;
+        final int assamStringLength = 4;
+
+        if (gameState.length() < assamStringLength + boardStringLength + 2 * playerStringLength) {
+            return false;
+        }
+        return true;
+    }
+
+    private static String[] stateStringParser(String gameState) {
+        final int playerStringLength = 8;
+        final int boardStringLength = 3 * 49;
+        final int assamStringLength = 4;
+
+
+        // Extract player strings
+        int numPlayers = (gameState.length() - boardStringLength - assamStringLength) / playerStringLength; // Assuming there are at least 2 players
+        String[] gameStrings = new String[numPlayers+2];
+
+
+        for (int i = 0; i < numPlayers; i++) {
+            int startIndex = i * playerStringLength;
+            int endIndex = startIndex + playerStringLength;
+            gameStrings[i] = gameState.substring(startIndex, endIndex);
+        }
+
+        // Extract Assam string
+        String assamString = gameState.substring(playerStringLength * numPlayers, playerStringLength * numPlayers + assamStringLength);
+        gameStrings[numPlayers] = assamString;
+
+
+        // Extract board string
+        String boardString = gameState.substring(numPlayers * playerStringLength + assamStringLength);
+        gameStrings[numPlayers+1] = boardString;
+
+
+        /* Print the results for testing purposes
+        System.out.println("Player Strings: " + numPlayers);
+        for (int i = 0; i < numPlayers; i++) {
+            System.out.println(gameStrings[i]);
+            System.out.println();
+        }
+
+        System.out.println("Assam String: " + assamString);
+        System.out.println();
+        System.out.println("Board String: " + boardString);
+
+         */
+        return gameStrings;
+    }
+
+
     public Marrakech(String gameState) {
+        if (isStateStringWellFormed(gameState)) {
+            String[] components = stateStringParser(gameState);
+            this.numberOfPlayers = components.length - 2;
+            this.currentPlayers = new Player[numberOfPlayers];
+            for (int i = 0; i < numberOfPlayers; i++) {
+                this.currentPlayers[i] = new Player(components[i]);
+            }
+            this.assam = new Assam(components[numberOfPlayers]);
+            this.board = new Board(components[numberOfPlayers+1]);
+            findCurrentTurn();
 
+        } else {
+            throw new IllegalArgumentException("Invalid stateString");
+        }
+    }
 
+    public void findCurrentTurn() {
+        int firstPlayerRugCount = this.currentPlayers[0].getRugCount();
+        for (int i = 0; i < this.numberOfPlayers ; i++) {
+            Player player = currentPlayers[i];
+            if (player.getRugCount() > firstPlayerRugCount) {
+                this.currentTurn = i;
+                break;
+            }
+        }
     }
 
 
@@ -25,6 +106,13 @@ public class Marrakech {
     public Marrakech(int numberOfPlayers, int numberOfAI) {
         this.numberOfPlayers = numberOfPlayers + numberOfAI;
         this.currentPlayers = new Player[this.numberOfPlayers];
+        for (int i = 0; i < numberOfPlayers ; i++) {
+            currentPlayers[i] = new Player(i);
+
+        }
+
+        this.board = new Board();
+        this.assam = new Assam();
         this.currentTurn = 0;
     }
 
@@ -45,32 +133,60 @@ public class Marrakech {
      *  - y013343 (Shares the ID but not the colour)
      * But you cannot have c014445, because this has the same colour and ID as a rug on the board already.
      * @param gameString A String representing the current state of the game as per the README
-     * @param rug A String representing the rug you are checking
+     * @param rugString A String representing the rug you are checking
      * @return true if the rug is valid, and false otherwise.
      */
-    public static boolean isRugValid(String gameString, String rug) {
-        if (rug.length() != 7) {
+    public static boolean isRugValid(String gameString, String rugString) {
+        // Check if the rugString is well formatted
+        if (!Rug.isRugStringWellFormed(rugString)) {
+            return false;
+        }
+        Marrakech marrakech = new Marrakech(gameString);
+        Rug rug = new Rug(rugString);
+        return isRugValid(marrakech,rug);
+    }
+
+    public static boolean isRugValid(Marrakech marrakech, Rug rug) {
+        Board currentBoard = marrakech.getBoard();
+        Tile[][] surfaceTiles = currentBoard.getSurfaceTiles();
+
+        // If either of the rug positions aren't within board
+        if (!rug.getHead().withinBoard() || !rug.getTail().withinBoard()) {
             return false;
         }
 
-        // FIXME: Task 4
+        int rugID = rug.getId();
+        Colour rugColour = rug.getColour();
+
+        // Check if that rug already exists within the current board
+        for (int x = 0; x < 7 ; x++) {
+            for (int y = 0; y < 7 ; y++) {
+                Tile tile = surfaceTiles[x][y];
+                if ((tile.getId() == rugID) && (tile.getColour() == rugColour)) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
-    /**
-     * Roll the special Marrakech die and return the result.
-     * Note that the die in Marrakech is not a regular 6-sided die, since there
-     * are no faces that show 5 or 6, and instead 2 faces that show 2 and 3. That
-     * is, of the 6 faces
-     *  - One shows 1
-     *  - Two show 2
-     *  - Two show 3
-     *  - One shows 4
-     * As such, in order to get full marks for this task, you will need to implement
-     * a die where the distribution of results from 1 to 4 is not even, with a 2 or 3
-     * being twice as likely to be returned as a 1 or 4.
-     * @return The result of the roll of the die meeting the criteria above
-     */
+
+
+        /**
+         * Roll the special Marrakech die and return the result.
+         * Note that the die in Marrakech is not a regular 6-sided die, since there
+         * are no faces that show 5 or 6, and instead 2 faces that show 2 and 3. That
+         * is, of the 6 faces
+         *  - One shows 1
+         *  - Two show 2
+         *  - Two show 3
+         *  - One shows 4
+         * As such, in order to get full marks for this task, you will need to implement
+         * a die where the distribution of results from 1 to 4 is not even, with a 2 or 3
+         * being twice as likely to be returned as a 1 or 4.
+         * @return The result of the roll of the die meeting the criteria above
+         */
     public static int rollDie() {
         int randomNum = ThreadLocalRandom.current().nextInt(1, 7);
         int dieRoll;
@@ -96,12 +212,15 @@ public class Marrakech {
     public static boolean isGameOver(String currentGame) {
         Marrakech marrakech = new Marrakech(currentGame);
         return marrakech.isGameOver();
-        // FIXME: Task 8
     }
 
     public boolean isGameOver() {
-        // FIXME: Task 8
-        return false;
+        for (Player player : currentPlayers) {
+            if (player.getRugCount() != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -141,9 +260,45 @@ public class Marrakech {
      * @return true if the placement is valid, and false otherwise.
      */
     public static boolean isPlacementValid(String gameState, String rug) {
-        // FIXME: Task 10
-        return false;
+        Marrakech marrakech = new Marrakech(gameState);
+        Rug rugMove = new Rug(rug);
+        return isPlacementValid(marrakech,rugMove);
     }
+
+    public static boolean isPlacementValid(Marrakech marrakech, Rug rug) {
+        Board currentBoard = marrakech.getBoard();
+        Tile[][] surfaceTiles = currentBoard.getSurfaceTiles();
+        Assam assam = marrakech.getAssam();
+        IntPair head = rug.getHead();
+        IntPair tail = rug.getTail();
+
+        // 1. A new rug must have one edge adjacent to Assam (not counting diagonals)
+        if (!(assam.isAdjacent(head) || assam.isAdjacent(tail))) {
+            return false;
+        }
+
+        // 2. A new rug must not completely cover another rug.
+        Tile headTile = surfaceTiles[head.getX()][head.getY()];
+        Tile tailTile = surfaceTiles[tail.getX()][tail.getY()];
+
+        if (headTile.isOccupied() || tailTile.isOccupied()) {
+            if (headTile.getId() == tailTile.getId()) {
+                return false;
+            }
+        }
+
+
+        // 3. A rug cannnot overlap with assam's position
+        IntPair assamPos = assam.getPosition();
+        if (assamPos.equals(head) || assamPos.equals(tail)) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+
 
     /**
      * Determine the amount of payment required should another player land on a square.
@@ -182,13 +337,49 @@ public class Marrakech {
      * @return A char representing the winner of the game as described above.
      */
     public static char getWinner(String gameState) {
-        if (!isGameOver(gameState)) {
+        Marrakech marrakech = new Marrakech(gameState);
+        return marrakech.getWinner();
+    }
+
+    public char getWinner() {
+        // If game isn't over
+        if (!this.isGameOver()) {
             return 'n';
         }
 
 
-        return '\0';
+        // Calculate the highest score
+        calculateScores();
+        int highestScore = 0;
+        for (Player player : this.currentPlayers) {
+            if (player.getScore() > highestScore) {
+                highestScore = player.getScore();
+            }
+        }
+
+        List<Player> winners = new ArrayList<>();
+        for (Player player : this.currentPlayers) {
+            if (player.getScore() == highestScore) {
+                winners.add(player);
+            }
+        }
+
+        if (winners.size() > 1) {
+            return 't';
+        } else {
+            Player winner =  winners.get(0);
+            Colour winnerCol = winner.getColour();
+            return winnerCol.toString().charAt(0);
+        }
     }
+
+    public void calculateScores() {
+        for (Player player : this.currentPlayers) {
+            player.calculateScore(this.board);
+        }
+    }
+
+
 
     /**
      * Implement Assam's movement.
@@ -202,8 +393,9 @@ public class Marrakech {
      * @return A String representing Assam's state after the movement.
      */
     public static String moveAssam(String currentAssam, int dieResult){
-        // FIXME: Task 13
-        return "";
+        Assam assam = new Assam(currentAssam);
+        assam.moveAssam(dieResult);
+        return assam.toString();
     }
 
     /**
@@ -213,13 +405,72 @@ public class Marrakech {
      * placement is valid, then you should return a new game string representing the board after the placement has
      * been completed. If the placement is invalid, then you should return the existing game unchanged.
      * @param currentGame A String representation of the current state of the game.
-     * @param rug A String representation of the rug that is to be placed.
+     * @param rugString A String representation of the rug that is to be placed.
      * @return A new game string representing the game following the successful placement of this rug if it is valid,
      * or the input currentGame unchanged otherwise.
      */
-    public static String makePlacement(String currentGame, String rug) {
-        // FIXME: Task 14
-        return "";
+    public static String makePlacement(String currentGame, String rugString) {
+        if (isRugValid(currentGame,rugString) && isPlacementValid(currentGame,rugString)) {
+            Marrakech marrakech = new Marrakech(currentGame);
+            Rug rug = new Rug(rugString);
+            marrakech.makePlacement(rug);
+            return marrakech.toString();
+        } else {
+            return currentGame;
+        }
+    }
+
+
+
+
+    public void makePlacement(Rug rug) {
+        if (isRugValid(this, rug) && isPlacementValid(this, rug)) {
+            this.board.placeTile(rug);
+            Colour rugColour = rug.getColour();
+            for (Player player : this.currentPlayers) {
+                Colour playerColour = player.getColour();
+                if (rugColour.equals(playerColour)) {
+                    player.updateRugCount();
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Cycles the turn, use once a placement is made
+     */
+    private void cycleTurn() {
+        int adjustedTurn = this.currentTurn++;
+        this.currentTurn = adjustedTurn % this.numberOfPlayers;
+    }
+
+    @Override
+    public String toString() {
+       StringBuilder stateString = new StringBuilder();
+       for (Player player : this.currentPlayers) {
+           stateString.append(player.toString());
+       }
+       stateString.append(this.assam.toString());
+       stateString.append(this.board.toString());
+       return stateString.toString();
+    }
+
+    public int getNumberOfPlayers() {
+        return numberOfPlayers;
+    }
+
+    public Player[] getCurrentPlayers() {
+        return currentPlayers;
+    }
+
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public Assam getAssam() {
+        return assam;
     }
 
 }

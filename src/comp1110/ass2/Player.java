@@ -4,6 +4,7 @@ public class Player {
 
     private int dirhams;
 
+    private int score;
 
     private int rugCount;
 
@@ -26,6 +27,23 @@ public class Player {
         this.dirhams = Integer.parseInt(playerString.substring(2,5)); // Range [2,5)
         this.rugCount = Integer.parseInt(playerString.substring(5,7)); // Range [5,7)
         this.inGame = playerString.charAt(7) == 'i';
+    }
+
+    /**
+     * Constructor for a player object at the start of the game
+     */
+
+    public Player(int n) {
+        switch (n) {
+            case 0: this.colour = Colour.Cyan; break;
+            case 1: this.colour = Colour.Yellow; break;
+            case 2: this.colour = Colour.Red; break;
+            case 3: this.colour = Colour.Purple; break;
+            default: throw new IllegalArgumentException("There is a maximum of 4 players");
+        }
+        this.dirhams = 30;
+        this.rugCount = 15;
+        this.inGame = true;
     }
 
     private static boolean isPlayerStringValid(String playerString) {
@@ -75,5 +93,74 @@ public class Player {
 
         return true;
     }
+
+    public int getDirhams() {
+        return dirhams;
+    }
+
+
+    public int getRugCount() {
+        return rugCount;
+    }
+
+    /**
+     * Method to update rugCount after a rug is placed by that player
+     * automatically updates inGame status based on rugCount
+     */
+    public void updateRugCount() {
+        this.rugCount--;
+        if (rugCount == 0) {
+            this.rugCount = 0;
+            this.inGame = false;
+        }
+    }
+
+    public boolean isInGame() {
+        return inGame;
+    }
+
+    public void calculateScore(Board board) {
+        Tile[][] surfaceTiles = board.getSurfaceTiles();
+        int surfaceTilesForPlayer = 0;
+        for (int x = 0; x < 7; x++) {
+            for (int y = 0; y < 7; y++) {
+                Tile tile = surfaceTiles[x][y];
+
+                if (tile.isOccupied()) {
+                    if (tile.getColour().equals(this.colour)) {
+                        surfaceTilesForPlayer++;
+                    }
+                }
+            }
+        }
+        this.score = surfaceTilesForPlayer + this.dirhams;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public Colour getColour() {
+        return colour;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder playerString = new StringBuilder();
+        playerString.append("P");
+        playerString.append(this.colour.toString());
+
+        String dirhamString = String.format("%03d", this.dirhams);
+        playerString.append(dirhamString);
+
+        String rugCountString = String.format("%02d", this.rugCount);
+        playerString.append(rugCountString);
+
+        String inGameString = this.inGame ? "i" : "o";
+        playerString.append(inGameString);
+
+        return playerString.toString();
+    }
+
 
 }
