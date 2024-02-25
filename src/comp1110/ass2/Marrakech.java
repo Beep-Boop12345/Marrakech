@@ -1,14 +1,18 @@
 package comp1110.ass2;
 
+import com.sun.jdi.PathSearchingVirtualMachine;
+
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 
 public class Marrakech {
-    private int currentTurn;
+    private int currentTurn; // This is not 0'th indexed so player 3 would be 3 not 2
     private int numberOfPlayers;
     private Player[] currentPlayers;
+
+    private boolean[] inGamePlayers;
 
     private Board board;
 
@@ -77,6 +81,10 @@ public class Marrakech {
             for (int i = 0; i < numberOfPlayers; i++) {
                 this.currentPlayers[i] = new Player(components[i]);
             }
+            this.inGamePlayers = new boolean[numberOfPlayers];
+            for (int i = 0; i < this.numberOfPlayers; i++) {
+                inGamePlayers[i] = this.currentPlayers[i].isInGame();
+            }
             this.assam = new Assam(components[numberOfPlayers]);
             this.board = new Board(components[numberOfPlayers+1]);
             findCurrentTurn();
@@ -86,16 +94,59 @@ public class Marrakech {
         }
     }
 
-    public void findCurrentTurn() {
-        int firstPlayerRugCount = this.currentPlayers[0].getRugCount();
-        for (int i = 0; i < this.numberOfPlayers ; i++) {
-            Player player = currentPlayers[i];
-            if (player.getRugCount() > firstPlayerRugCount) {
-                this.currentTurn = i;
+    /**
+     * Finds the current turn using logic from the rugCount.
+     *
+     * The first player with the most rugs (in chronological order
+     * from first to the number of players) is the one whose turn it is
+     * provided they are still in the game.
+     * Eg. If players 1 and 2 have 3 rugs and players 3 and 4 have 4
+     *     rugs and all players are in the game it is player 3's turn.
+     *
+     * If all players have the same rugCount than it is the first
+     * player's turn.
+     */
+    private void findCurrentTurn() {
+        // Calculate rugCounts for each player
+        int[] rugCounts = new int[this.numberOfPlayers];
+        for (int i = 0; i < this.numberOfPlayers; i++) {
+            rugCounts[i] = this.currentPlayers[i].getRugCount();
+        }
+
+        /* Find the first player in chronological order with the highest rugCount
+           If all players have the same rugCount defaults the first player        */
+        int turnBasedOfRugs = 0;
+        for (int i = 0; i < this.numberOfPlayers; i++) {
+            if (rugCounts[i] > rugCounts[turnBasedOfRugs]) {
+                turnBasedOfRugs = i;
                 break;
             }
         }
+        this.currentTurn = turnBasedOfRugs;
+
+        // Account for players that are no longer in the game
+        if (!this.inGamePlayers[this.currentTurn]) {
+            cycleTurn();
+        }
+
     }
+
+
+    /**
+     * Cycles the turn, use once a placement is made
+     * isGameOver() is run before this function so the assumption is
+     * made that game is not yet over.
+     */
+    private void cycleTurn() {
+        // Shift the current turn once
+        this.currentTurn = (this.currentTurn + 1) % this.numberOfPlayers;
+
+        // Shift again accounting for players that aren't in the game
+        while (!inGamePlayers[this.currentTurn]) {
+            this.currentTurn = (this.currentTurn + 1) % this.numberOfPlayers;
+        }
+    }
+
 
 
     /**
@@ -143,11 +194,11 @@ public class Marrakech {
         }
         Marrakech marrakech = new Marrakech(gameString);
         Rug rug = new Rug(rugString);
-        return isRugValid(marrakech,rug);
+        return marrakech.isRugValid(rug);
     }
 
-    public static boolean isRugValid(Marrakech marrakech, Rug rug) {
-        Board currentBoard = marrakech.getBoard();
+    public boolean isRugValid(Rug rug) {
+        Board currentBoard = this.board;
         Tile[][] surfaceTiles = currentBoard.getSurfaceTiles();
 
         // If either of the rug positions aren't within board
@@ -215,12 +266,12 @@ public class Marrakech {
     }
 
     public boolean isGameOver() {
-        for (Player player : currentPlayers) {
-            if (player.getRugCount() != 0) {
-                return false;
-            }
+        Player player = currentPlayers[this.currentTurn];
+        if (player.getRugCount() == 0) {
+            return true;
         }
-        return true;
+
+        return false;
     }
 
     /**
@@ -262,13 +313,13 @@ public class Marrakech {
     public static boolean isPlacementValid(String gameState, String rug) {
         Marrakech marrakech = new Marrakech(gameState);
         Rug rugMove = new Rug(rug);
-        return isPlacementValid(marrakech,rugMove);
+        return marrakech.isPlacementValid(rugMove);
     }
 
-    public static boolean isPlacementValid(Marrakech marrakech, Rug rug) {
-        Board currentBoard = marrakech.getBoard();
+    public boolean isPlacementValid(Rug rug) {
+        Board currentBoard = this.board;
         Tile[][] surfaceTiles = currentBoard.getSurfaceTiles();
-        Assam assam = marrakech.getAssam();
+        Assam assam = this.assam;
         IntPair head = rug.getHead();
         IntPair tail = rug.getTail();
 
@@ -282,7 +333,7 @@ public class Marrakech {
         Tile tailTile = surfaceTiles[tail.getX()][tail.getY()];
 
         if (headTile.isOccupied() || tailTile.isOccupied()) {
-            if (headTile.getId() == tailTile.getId()) {
+            if ((headTile.getId() == tailTile.getId()) && (headTile.getColour() == tailTile.getColour())) {
                 return false;
             }
         }
@@ -313,13 +364,11 @@ public class Marrakech {
     public static int getPaymentAmount(String gameString) {
         Marrakech marrakech = new Marrakech(gameString);
         return marrakech.getPaymentAmount();
-        // FIXME: Task 11
-
     }
 
     public int getPaymentAmount() {
-        // FIXME: Task 11
-        return -1;
+        IntPair assamPos = this.assam.getPosition();
+        return this.board.findLargestGroup(assamPos);
     }
 
     /**
@@ -348,18 +397,41 @@ public class Marrakech {
         }
 
 
-        // Calculate the highest score
+        // Calculate each player scores and the highest score
         calculateScores();
         int highestScore = 0;
-        for (Player player : this.currentPlayers) {
-            if (player.getScore() > highestScore) {
-                highestScore = player.getScore();
+
+        int[] playerScores = new int[this.numberOfPlayers];
+        for (int i = 0; i < this.numberOfPlayers; i++) {
+            playerScores[i] = this.currentPlayers[i].getScore();
+            if ((playerScores[i] > highestScore) && inGamePlayers[i]) {
+                highestScore = playerScores[i];
             }
         }
 
+        // Find players with the highest scores
+        List<Player> playersWithHighestScore = new ArrayList<>();
+        for (int i = 0; i < this.numberOfPlayers; i++) {
+            if (inGamePlayers[i]) {
+                Player player = this.currentPlayers[i];
+                if (playerScores[i] == highestScore) {
+                    playersWithHighestScore.add(player);
+                }
+            }
+        }
+
+        // Calculate the highest dirhams amongst the highest scoring players
+        int highestDirhamsAmongHighestScore = 0;
+        for (Player player : playersWithHighestScore) {
+            if (player.getDirhams() > highestDirhamsAmongHighestScore) {
+                highestDirhamsAmongHighestScore = player.getDirhams();
+            }
+        }
+
+
         List<Player> winners = new ArrayList<>();
-        for (Player player : this.currentPlayers) {
-            if (player.getScore() == highestScore) {
+        for (Player player : playersWithHighestScore) {
+            if (player.getDirhams() == highestDirhamsAmongHighestScore) {
                 winners.add(player);
             }
         }
@@ -367,8 +439,7 @@ public class Marrakech {
         if (winners.size() > 1) {
             return 't';
         } else {
-            Player winner =  winners.get(0);
-            Colour winnerCol = winner.getColour();
+            Colour winnerCol = winners.get(0).getColour();
             return winnerCol.toString().charAt(0);
         }
     }
@@ -424,7 +495,7 @@ public class Marrakech {
 
 
     public void makePlacement(Rug rug) {
-        if (isRugValid(this, rug) && isPlacementValid(this, rug)) {
+        if (isRugValid(rug) && isPlacementValid(rug)) {
             this.board.placeTile(rug);
             Colour rugColour = rug.getColour();
             for (Player player : this.currentPlayers) {
@@ -437,13 +508,6 @@ public class Marrakech {
         }
     }
 
-    /**
-     * Cycles the turn, use once a placement is made
-     */
-    private void cycleTurn() {
-        int adjustedTurn = this.currentTurn++;
-        this.currentTurn = adjustedTurn % this.numberOfPlayers;
-    }
 
     @Override
     public String toString() {

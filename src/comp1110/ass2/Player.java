@@ -109,10 +109,6 @@ public class Player {
      */
     public void updateRugCount() {
         this.rugCount--;
-        if (rugCount == 0) {
-            this.rugCount = 0;
-            this.inGame = false;
-        }
     }
 
     public boolean isInGame() {

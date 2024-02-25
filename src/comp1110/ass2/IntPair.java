@@ -29,6 +29,12 @@ public class IntPair {
         }
     }
 
+    public IntPair add(IntPair other) {
+        int sumX = this.x + other.getX();
+        int sumY = this.y + other.getY();
+        return new IntPair(sumX, sumY);
+    }
+
 
     public boolean withinBoard() {
         if (this.x < 0 || this.x > 6) {
