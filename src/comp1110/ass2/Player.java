@@ -105,7 +105,6 @@ public class Player {
 
     /**
      * Method to update rugCount after a rug is placed by that player
-     * automatically updates inGame status based on rugCount
      */
     public void updateRugCount() {
         this.rugCount--;

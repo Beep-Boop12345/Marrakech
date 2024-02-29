@@ -292,10 +292,7 @@ public class Marrakech {
             return currentAssam;
         }
         Assam assam = new Assam(currentAssam);
-        Direction currentDirection = assam.getDirection();
-        int newAngle = currentDirection.getValue() + rotation;
-        Direction newDirection = Direction.getDirection(newAngle);
-        assam.setDirection(newDirection);
+        assam.rotateAssam(rotation);
         return assam.toString();
     }
 
@@ -536,5 +533,10 @@ public class Marrakech {
     public Assam getAssam() {
         return assam;
     }
+
+    public int getCurrentTurn() {
+        return currentTurn;
+    }
+
 
 }

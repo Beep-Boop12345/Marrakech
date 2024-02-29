@@ -97,8 +97,11 @@ public class Assam {
         return facing;
     }
 
-    public void setDirection(Direction direction) {
-        this.facing = direction;
+    public void rotateAssam(int rotation) {
+        Direction currentDirection = this.getDirection();
+        int newAngle = currentDirection.getValue() + rotation;
+        Direction newDirection = Direction.getDirection(newAngle);
+        this.facing = newDirection;
     }
 
     public void moveAssam(int steps) {
