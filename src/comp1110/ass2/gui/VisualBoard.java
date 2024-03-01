@@ -2,6 +2,7 @@ package comp1110.ass2.gui;
 
 import comp1110.ass2.*;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -12,17 +13,16 @@ public class VisualBoard extends Group {
     private Board board;
 
     private ArrayList<Square> boardSquares;
-    private ArrayList<VisualTile> tiles;
 
 
     private static final int sidelength = 80;
 
     class Square extends Rectangle {
-        public Square(double side, double x, double y) {
+        public Square(double side, double x, double y, Color color) {
             super(side,side);
             this.setLayoutX(x);
             this.setLayoutY(y);
-            setFill(Color.rgb(245,228,176));
+            setFill(color);
             setStroke(Color.BLACK);
             setStrokeWidth(2);
         }
@@ -32,7 +32,6 @@ public class VisualBoard extends Group {
     VisualBoard(Board board) {
         this.board = board;
         this.boardSquares = new ArrayList<>();
-        this.tiles = new ArrayList<>();
 
 
         // Creates the background boardSquares
@@ -40,27 +39,64 @@ public class VisualBoard extends Group {
             for (int j = 0; j < 7; j++) {
                 double xPos = i * sidelength;
                 double yPos = j * sidelength;
-                Square square = new Square(sidelength,xPos,yPos);
+                Tile tile = board.getSurfaceTiles()[i][j];
+                Colour colour = tile.getColour();
+                Color squareColor = colourToColor(colour);
+                Square square = new Square(sidelength,xPos,yPos,squareColor);
                 this.boardSquares.add(square);
             }
         }
         this.getChildren().addAll(boardSquares);
+    }
 
-        // Adds all the rug elements on top of the board
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 7; j++) {
-                Tile tile = this.board.getSurfaceTiles()[i][j];
-                VisualTile visualTile = new VisualTile(tile,i,j);
-                tiles.add(visualTile);
+    private Color colourToColor(Colour colour) {
+        if (colour == null) {
+            return Color.rgb(245,228,176);
+        }
+        switch (colour) {
+            case Yellow -> {
+                return Color.YELLOW;
+            }
+            case Purple -> {
+                return Color.PURPLE;
+            }
+            case Cyan -> {
+                return Color.CYAN;
+            }
+            case Red -> {
+                return Color.RED;
+            }
+            default -> {
+                return Color.rgb(245,228,176);
             }
         }
-        this.getChildren().addAll(tiles);
     }
 
-    public void displayAssam(VisualAssam visualAssam) {
-        visualAssam.setLayoutX(visualAssam.getX());
-        visualAssam.setLayoutY(visualAssam.getY());
+    public void displayAssam(Assam assam) {
+        VisualAssam visualAssam = new VisualAssam(assam);
+
+        double offset;
+        switch (assam.getDirection()) {
+            case NORTH: case SOUTH:
+                offset = 5;
+                break;
+            case WEST: case EAST:
+                offset = 2.5;
+                break;
+            default:
+                offset = 0;
+                break;
+        }
+
+        double assamX = assam.getPosition().getX() * sidelength + offset;
+        double assamY = assam.getPosition().getY() * sidelength;
+
+
+
+        visualAssam.setLayoutX(assamX);
+        visualAssam.setLayoutY(assamY);
+
+
+        this.getChildren().add(visualAssam);
     }
-
-
 }

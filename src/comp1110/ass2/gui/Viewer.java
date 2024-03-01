@@ -42,9 +42,14 @@ public class Viewer extends Application {
     
     private static Roller clock;
 
-    private static VisualAssam visualAssam;
+    /* Static Fields for easy access */
+    private static Marrakech currentMarrakech;
+
+    private static VisualBoard currentBoard;
 
     private static final AudioClip dieSound = new AudioClip("file:assets/Sounds/rollsound.mp3");
+
+    private static final AudioClip assamMoveSound = new AudioClip("file:assets/Sounds/assamslide.mp3");
 
 
     /* Code used to animate dice rolls, roll button event handler included */
@@ -68,6 +73,7 @@ public class Viewer extends Application {
                     clock.stop();
                     int rollFinal = Marrakech.rollDie();
                     setDieImage(rollFinal);
+                    assamMoveSound.play();
                     rollButton.setDisable(false);
                     count = 0;
                 }
@@ -110,11 +116,13 @@ public class Viewer extends Application {
 
         // Reset the current view
         root.getChildren().remove(currentView);
+        currentMarrakech = marrakech;
         Group newView  = new Group();
 
 
         // Constructs the board and adds it to the viewer, (assam is included)
-        VisualBoard currentBoard = new VisualBoard(marrakech.getBoard());
+        currentBoard = new VisualBoard(marrakech.getBoard());
+        currentBoard.displayAssam(marrakech.getAssam());
 
         // Calculate the position to center the board
         double boardWidth = currentBoard.getLayoutBounds().getWidth();
@@ -154,7 +162,7 @@ public class Viewer extends Application {
         rollButton.setMaxSize(100,100);
 
         double rollX = boardX - 250;
-        double rollY = boardY + boardHeight / 2 + 20 ;
+        double rollY = boardY + boardHeight / 2;
         rollButton.setLayoutX(rollX);
         rollButton.setLayoutY(rollY);
         newView.getChildren().add(rollButton);
@@ -163,7 +171,7 @@ public class Viewer extends Application {
         Image dieImage = new Image("file:assets/Images/dice-six-faces-1.png",100,100,true,true);
         dieImageV = new ImageView(dieImage);
         double dieX = rollX;
-        double dieY = rollY - rollButton.getLayoutBounds().getHeight() - dieImageV.getLayoutBounds().getHeight() - 5;
+        double dieY = rollY - 105;
         dieImageV.setLayoutX(dieX);
         dieImageV.setLayoutY(dieY);
         newView.getChildren().add(dieImageV);
@@ -177,7 +185,7 @@ public class Viewer extends Application {
         rotateButton.setMaxSize(100,100);
 
         double rotateX = dieX;
-        double rotateY = dieY - dieImageV.getLayoutBounds().getHeight() - rotateButton.getLayoutBounds().getHeight() - 5;
+        double rotateY = dieY - 105;
         rotateButton.setLayoutX(rotateX);
         rotateButton.setLayoutY(rotateY);
         newView.getChildren().add(rotateButton);
@@ -189,6 +197,8 @@ public class Viewer extends Application {
         currentView = newView;
 
     }
+
+
 
 
     /**
@@ -206,7 +216,14 @@ public class Viewer extends Application {
      */
     private void setupRotateEventHandler() {
         rotateButton.setOnAction(event -> {
-            System.out.println("Hi!");
+            if (currentMarrakech != null) {
+                currentMarrakech.getAssam().rotateAssam(90);
+                if (currentBoard != null){
+                    currentBoard.getChildren().removeIf(node -> node instanceof VisualAssam);
+                    currentBoard.displayAssam(currentMarrakech.getAssam());
+                }
+            }
+
 
         });
     }
@@ -237,6 +254,7 @@ public class Viewer extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Marrakech Viewer");
+
         Scene scene = new Scene(root, VIEWER_WIDTH, VIEWER_HEIGHT);
 
         root.getChildren().add(controls);

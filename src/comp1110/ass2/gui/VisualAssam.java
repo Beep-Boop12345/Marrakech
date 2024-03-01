@@ -1,26 +1,45 @@
 package comp1110.ass2.gui;
 import comp1110.ass2.*;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
-public class VisualAssam extends Group {
+public class VisualAssam extends ImageView {
     private static final int sidelength = 80;
 
-    private int x;
+    private Direction direction;
 
-    private int y;
+    private Image assamImage;
 
     public VisualAssam(Assam assam) {
-        this.x = assam.getPosition().getX();
-        this.y = assam.getPosition().getY();
+        this.direction = assam.getDirection();
+        setAssamImage();
+        this.setPreserveRatio(true);
+        this.setSmooth(true);
+        this.setFitHeight(sidelength);
+        this.setFitWidth(sidelength);
+    }
 
+    public void setAssamImage() {
+        switch (this.direction) {
+            case NORTH -> {
+                assamImage = new Image("file:assets/Images/assamsprites/North.png");
+                this.setImage(assamImage);
+            }
+            case SOUTH -> {
+                assamImage = new Image("file:assets/Images/assamsprites/South.png");
+                this.setImage(assamImage);
+            }
+            case EAST -> {
+                assamImage = new Image("file:assets/Images/assamsprites/East.png");
+                this.setImage(assamImage);
+            }
+            case WEST -> {
+                assamImage = new Image("file:assets/Images/assamsprites/West.png");
+                this.setImage(assamImage);
+            }
+        }
     }
 
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
 }
