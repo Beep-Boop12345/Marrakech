@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 public class Viewer extends Application {
 
+    private Scene scene;
     private static final int VIEWER_WIDTH = 1200;
     private static final int VIEWER_HEIGHT = 700;
 
@@ -50,6 +51,19 @@ public class Viewer extends Application {
     private static final AudioClip dieSound = new AudioClip("file:assets/Sounds/rollsound.mp3");
 
     private static final AudioClip assamMoveSound = new AudioClip("file:assets/Sounds/assamslide.mp3");
+
+    public Viewer(Marrakech initialGame) {
+        currentMarrakech = initialGame;
+        Stage primaryStage = new Stage();
+        this.scene = new Scene(root, VIEWER_WIDTH, VIEWER_HEIGHT);
+        setupRollEventHandler();
+        setupRotateEventHandler();
+        initialiseRoller();
+        displayGame(initialGame);
+        primaryStage.setScene(scene);
+        root.getChildren().add(controls);
+        primaryStage.show();
+    }
 
 
     /* Code used to animate dice rolls, roll button event handler included */
@@ -229,6 +243,42 @@ public class Viewer extends Application {
     }
 
     /**
+     * Updates the scoreboard. Used once a rug turn updates the game instance of marrakech.
+     */
+    private void updateScoreboard() {
+        // Constants used for positioning
+        double boardWidth = currentBoard.getLayoutBounds().getWidth();
+        double boardHeight = currentBoard.getLayoutBounds().getHeight();
+        double boardX = (VIEWER_WIDTH - boardWidth) / 2;
+        double boardY = (VIEWER_HEIGHT - boardHeight) / 2;
+
+
+        if (currentView != null && currentMarrakech != null) {
+            currentView.getChildren().removeIf(node -> node instanceof Scoreboard);
+            // Scoreboard for all players
+            ArrayList<Scoreboard> scoreboards = new ArrayList<>();
+            double scoreBoardX = boardX + boardWidth + 50;
+            int radius = 20;
+            Player[] currentPlayers = currentMarrakech.getCurrentPlayers();
+            for (int i = 0; i < currentPlayers.length; i++) {
+                Scoreboard scoreboard = new Scoreboard(currentPlayers[i]);
+                double scoreboardHeight = scoreboard.getLayoutBounds().getHeight();
+                double scoreBoardY = (boardY + radius + 150) + (1.5 * scoreboardHeight * i);
+                scoreboard.setLayoutX(scoreBoardX);
+                scoreboard.setLayoutY(scoreBoardY);
+                if (i == currentMarrakech.getCurrentTurn()) {
+                    scoreboard.setOpacity(1);
+                } else {
+                    scoreboard.setOpacity(0.3);
+                }
+                scoreboards.add(scoreboard);
+
+            }
+            currentView.getChildren().addAll(scoreboards);
+        }
+    }
+
+    /**
      * Create a basic text field for input and a refresh button.
      */
     private void makeControls() {
@@ -250,6 +300,7 @@ public class Viewer extends Application {
         hb.setLayoutY(VIEWER_HEIGHT - 50);
         controls.getChildren().add(hb);
     }
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {

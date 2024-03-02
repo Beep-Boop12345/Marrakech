@@ -72,6 +72,20 @@ public class Marrakech {
         return gameStrings;
     }
 
+    public Marrakech(int numberOfPlayers) {
+        this.numberOfPlayers = numberOfPlayers;
+        this.currentPlayers = new Player[numberOfPlayers];
+        for (int i = 0; i < this.numberOfPlayers ; i++) {
+            this.currentPlayers[i] = new Player(i);
+        }
+        this.inGamePlayers = new boolean[this.numberOfPlayers];
+        for (int i = 0; i < this.numberOfPlayers ; i++) {
+            inGamePlayers[i] = true;
+        }
+        this.assam = new Assam();
+        this.board = new Board();
+        this.currentTurn = 0;
+    }
 
     public Marrakech(String gameState) {
         if (isStateStringWellFormed(gameState)) {

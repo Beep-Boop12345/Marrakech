@@ -54,6 +54,10 @@ public class Rug {
         return true;
     }
 
+    public boolean isVertical() {
+        return true; // todo
+    }
+
 
 
 
