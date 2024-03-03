@@ -78,10 +78,10 @@ public class VisualBoard extends Group {
         double offset;
         switch (assam.getDirection()) {
             case NORTH: case SOUTH:
-                offset = 5;
+                offset = 6;
                 break;
             case WEST: case EAST:
-                offset = 2.5;
+                offset = 4;
                 break;
             default:
                 offset = 0;
@@ -90,8 +90,6 @@ public class VisualBoard extends Group {
 
         double assamX = assam.getPosition().getX() * sidelength + offset;
         double assamY = assam.getPosition().getY() * sidelength;
-
-
 
         visualAssam.setLayoutX(assamX);
         visualAssam.setLayoutY(assamY);

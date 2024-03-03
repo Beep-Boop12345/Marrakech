@@ -9,6 +9,8 @@ public class VisualRug extends ImageView {
 
     private boolean isVertical;
 
+    private IntPair position;
+
 
     public VisualRug(Rug rug) {
         switch (rug.getColour()) {
@@ -26,7 +28,8 @@ public class VisualRug extends ImageView {
             }
 
         }
-
+        this.position = rug.getHead();
         this.isVertical = rug.isVertical();
+        if (this.isVertical) this.setRotate(90);
     }
 }

@@ -164,24 +164,6 @@ public class Marrakech {
 
 
     /**
-     * Constructor for initial Marrakech object used for the Setup
-     * @param numberOfPlayers
-     * @param numberOfAI
-     */
-    public Marrakech(int numberOfPlayers, int numberOfAI) {
-        this.numberOfPlayers = numberOfPlayers + numberOfAI;
-        this.currentPlayers = new Player[this.numberOfPlayers];
-        for (int i = 0; i < numberOfPlayers ; i++) {
-            currentPlayers[i] = new Player(i);
-
-        }
-
-        this.board = new Board();
-        this.assam = new Assam();
-        this.currentTurn = 0;
-    }
-
-    /**
      * Determine whether a rug String is valid.
      * For this method, you need to determine whether the rug String is valid, but do not need to determine whether it
      * can be placed on the board (you will determine that in Task 10 ). A rug is valid if and only if all the following

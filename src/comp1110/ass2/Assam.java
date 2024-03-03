@@ -228,12 +228,7 @@ public class Assam {
         return "A" + position.toString() + facing.toString();
     }
 
-    public static void main(String[] args) {
-        Assam assam = new Assam();
-        assam.facing = Direction.EAST;
-        assam.position = new IntPair(2,0);
-        System.out.println(assam.toString());
-    }
+
 
 }
 

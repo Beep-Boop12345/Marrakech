@@ -65,6 +65,9 @@ public class Viewer extends Application {
         primaryStage.show();
     }
 
+    public Viewer() { boardTextField = new TextField();
+    }
+
 
     /* Code used to animate dice rolls, roll button event handler included */
     private class Roller extends AnimationTimer {
@@ -88,6 +91,12 @@ public class Viewer extends Application {
                     int rollFinal = Marrakech.rollDie();
                     setDieImage(rollFinal);
                     assamMoveSound.play();
+                    if (currentMarrakech != null && currentMarrakech.getAssam() != null) {
+                        currentMarrakech.getAssam().moveAssam(rollFinal);
+                        currentBoard.getChildren().removeIf(node -> node instanceof VisualAssam);
+                        currentBoard.displayAssam(currentMarrakech.getAssam());
+
+                    }
                     rollButton.setDisable(false);
                     count = 0;
                 }
@@ -307,7 +316,6 @@ public class Viewer extends Application {
         primaryStage.setTitle("Marrakech Viewer");
 
         Scene scene = new Scene(root, VIEWER_WIDTH, VIEWER_HEIGHT);
-
         root.getChildren().add(controls);
 
         makeControls();
