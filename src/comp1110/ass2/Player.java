@@ -131,6 +131,24 @@ public class Player {
         this.score = surfaceTilesForPlayer + this.dirhams;
     }
 
+
+    public void makePayment(int paymentAmount, Player playerToPay) {
+        if (paymentAmount > this.dirhams) {
+            playerToPay.updateDirhams(this.dirhams);
+            this.dirhams = 0;
+        } else {
+            playerToPay.updateDirhams(paymentAmount);
+            this.dirhams -= paymentAmount;
+        }
+
+
+    }
+
+    private void updateDirhams(int amount) {
+        this.dirhams += amount;
+    }
+
+
     public int getScore() {
         return score;
     }

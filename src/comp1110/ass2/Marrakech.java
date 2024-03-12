@@ -1,6 +1,5 @@
 package comp1110.ass2;
 
-import com.sun.jdi.PathSearchingVirtualMachine;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -24,10 +23,7 @@ public class Marrakech {
         final int boardStringLength = 3 * 49;
         final int assamStringLength = 4;
 
-        if (gameState.length() < assamStringLength + boardStringLength + 2 * playerStringLength) {
-            return false;
-        }
-        return true;
+        return gameState.length() >= assamStringLength + boardStringLength + 2 * playerStringLength;
     }
 
     private static String[] stateStringParser(String gameState) {
@@ -56,19 +52,6 @@ public class Marrakech {
         String boardString = gameState.substring(numPlayers * playerStringLength + assamStringLength);
         gameStrings[numPlayers+1] = boardString;
 
-
-        /* Print the results for testing purposes
-        System.out.println("Player Strings: " + numPlayers);
-        for (int i = 0; i < numPlayers; i++) {
-            System.out.println(gameStrings[i]);
-            System.out.println();
-        }
-
-        System.out.println("Assam String: " + assamString);
-        System.out.println();
-        System.out.println("Board String: " + boardString);
-
-         */
         return gameStrings;
     }
 
@@ -110,13 +93,11 @@ public class Marrakech {
 
     /**
      * Finds the current turn using logic from the rugCount.
-     *
      * The first player with the most rugs (in chronological order
      * from first to the number of players) is the one whose turn it is
      * provided they are still in the game.
      * Eg. If players 1 and 2 have 3 rugs and players 3 and 4 have 4
      *     rugs and all players are in the game it is player 3's turn.
-     *
      * If all players have the same rugCount than it is the first
      * player's turn.
      */
@@ -263,11 +244,7 @@ public class Marrakech {
 
     public boolean isGameOver() {
         Player player = currentPlayers[this.currentTurn];
-        if (player.getRugCount() == 0) {
-            return true;
-        }
-
-        return false;
+        return player.getRugCount() == 0;
     }
 
     /**
@@ -359,10 +336,35 @@ public class Marrakech {
         return marrakech.getPaymentAmount();
     }
 
-    public int getPaymentAmount() {
+    private int getPaymentAmount() {
         IntPair assamPos = this.assam.getPosition();
         return this.board.findLargestGroup(assamPos);
     }
+
+
+    /**
+     * Updates the marrakech object to correctly represent the payment after assam lands on a rug.
+     * This method is used after a rug is placed and assam is moved, and it updates the player information
+     * to correctly represent payment. Finally, the method also cycles turn to indicate it is the next player's turn.
+     */
+    public void makePayment() {
+        IntPair assamPosition = this.assam.getPosition();
+        Tile assamTile = this.board.getSurfaceTiles()[assamPosition.getX()][assamPosition.getY()];
+        Player playerToPay = null;
+        for (Player player : this.currentPlayers) {
+            if (player.getColour() == assamTile.getColour()) {
+                playerToPay = player;
+                break;
+            }
+        }
+        int paymentAmount = getPaymentAmount();
+        Player playerToMakePayment = this.currentPlayers[currentTurn];
+        if (playerToPay != null) {
+            playerToMakePayment.makePayment(paymentAmount,playerToPay);
+        }
+        cycleTurn();
+    }
+
 
     /**
      * Determine the winner of a game of Marrakech.
@@ -499,6 +501,10 @@ public class Marrakech {
                 }
             }
         }
+    }
+
+    public Set<Rug> getAllValidRugs() {
+        // todo
     }
 
 

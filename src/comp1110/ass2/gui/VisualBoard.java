@@ -97,4 +97,12 @@ public class VisualBoard extends Group {
 
         this.getChildren().add(visualAssam);
     }
+
+    public void highlightNearestSquares(double x, double y) {
+        // todo
+    }
+
+    public Square findNearestSquare(double x, double y) {
+        // todo
+    }
 }
