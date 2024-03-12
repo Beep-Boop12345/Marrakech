@@ -504,6 +504,7 @@ public class Marrakech {
     }
 
     public Set<Rug> getAllValidRugs() {
+        return null;
         // todo
     }
 

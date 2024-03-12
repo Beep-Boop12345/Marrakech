@@ -35,7 +35,7 @@ public class VisualRug extends ImageView {
         if (this.isVertical) this.setRotate(90);
     }
 
-    private double distance(double x, double y) {
+    public double distance(double x, double y) {
         double deltaX = this.getLayoutX() - x;
         double deltaY = this.getLayoutY() - y;
         return Math.sqrt(deltaX*deltaX+deltaY*deltaY);

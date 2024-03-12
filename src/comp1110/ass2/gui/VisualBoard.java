@@ -103,6 +103,7 @@ public class VisualBoard extends Group {
     }
 
     public Square findNearestSquare(double x, double y) {
+        return null;
         // todo
     }
 }
