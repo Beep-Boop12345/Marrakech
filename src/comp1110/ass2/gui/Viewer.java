@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 
 import javafx.scene.media.AudioClip;
@@ -246,8 +247,14 @@ public class Viewer extends Application {
                     currentBoard.displayAssam(currentMarrakech.getAssam());
                 }
             }
+        });
+    }
 
-
+    private void setupRugRotationHandler() {
+        scene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.R) {
+                // visualRug.rotate();
+            }
         });
     }
 
@@ -316,11 +323,15 @@ public class Viewer extends Application {
         primaryStage.setTitle("Marrakech Viewer");
 
         Scene scene = new Scene(root, VIEWER_WIDTH, VIEWER_HEIGHT);
+
+
+
         root.getChildren().add(controls);
 
         makeControls();
         setupRollEventHandler();
         setupRotateEventHandler();
+        setupRugRotationHandler();
         initialiseRoller();
 
         primaryStage.setScene(scene);

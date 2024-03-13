@@ -7,12 +7,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class VisualBoard extends Group {
 
     private Board board;
 
     private ArrayList<Square> boardSquares;
+
 
 
     private static final int sidelength = 80;
@@ -27,6 +31,21 @@ public class VisualBoard extends Group {
             setStrokeWidth(2);
         }
 
+        private double distance(double x, double y) {
+            double deltaX = this.getLayoutY() - x;
+            double deltaY = this.getLayoutY() - y;
+            return Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+        }
+
+
+        public void highlight(Colour colour) {
+            Color color = colourToColor(colour);
+            this.setFill(color);
+        }
+
+        public void dehighlight() {
+            this.setFill(Color.rgb(245,228,176));
+        }
     }
 
     VisualBoard(Board board) {
@@ -47,6 +66,8 @@ public class VisualBoard extends Group {
             }
         }
         this.getChildren().addAll(boardSquares);
+
+
     }
 
     private Color colourToColor(Colour colour) {
@@ -98,12 +119,48 @@ public class VisualBoard extends Group {
         this.getChildren().add(visualAssam);
     }
 
-    public void highlightNearestSquares(double x, double y) {
-        // todo
+    public void highlightNearestRug(double x, double y, boolean isVertical, Colour colour) {
+        List<Square> squaresToHighlight = findNearestRug(x, y, isVertical);
+        for (Square square : squaresToHighlight) {
+            square.highlight(colour);
+        }
     }
 
-    public Square findNearestSquare(double x, double y) {
-        return null;
-        // todo
+    public void dehighlightAllSquares() {
+        for (Square square : this.boardSquares) {
+            square.dehighlight();
+        }
+    }
+
+    public List<Square> findNearestRug(double x, double y, boolean isVertical) {
+        List<Square> rugSquares = new ArrayList<>();
+        Square nearestSquare = this.boardSquares.get(0);
+        for (Square square : this.boardSquares) {
+            if (square.distance(x,y) < nearestSquare.distance(x,y)) {
+                nearestSquare = square;
+            }
+        }
+
+        double nearestSquareX = nearestSquare.getLayoutX();
+        double nearestSquareY = nearestSquare.getLayoutY();
+        double otherSquareX;
+        double otherSquareY;
+        if (isVertical) {
+            otherSquareX = nearestSquareX;
+            otherSquareY = nearestSquareY + sidelength;
+        } else {
+            otherSquareX = nearestSquareX + sidelength;
+            otherSquareY = nearestSquareY;
+        }
+        Square otherSquare = null;
+        for (Square square : this.boardSquares) {
+            if (square.getLayoutX() == otherSquareX && square.getLayoutY() == otherSquareY) {
+                otherSquare = square;
+                break;
+            }
+        }
+        rugSquares.add(nearestSquare);
+        rugSquares.add(otherSquare);
+        return rugSquares;
     }
 }

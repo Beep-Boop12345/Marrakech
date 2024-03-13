@@ -4,18 +4,28 @@ import comp1110.ass2.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.util.List;
+import java.util.Set;
+
 public class VisualRug extends ImageView {
     private Image rugImage;
+
+    private Colour colour;
 
     private static final int sidelength = 80;
 
     private boolean isVertical;
 
     private IntPair position;
+    private double mouseX;
+
+    private double mouseY;
+
+    private VisualBoard visualBoard;
 
 
-    public VisualRug(Rug rug) {
-        switch (rug.getColour()) {
+    public VisualRug(Colour colour, VisualBoard visualBoard) {
+        switch (colour) {
             case Red -> {
                 rugImage = new Image("a");
             }
@@ -30,57 +40,50 @@ public class VisualRug extends ImageView {
             }
 
         }
-        this.position = rug.getHead();
-        this.isVertical = rug.isVertical();
+        this.colour = colour;
+        this.isVertical = true;
+        this.visualBoard = visualBoard;
         if (this.isVertical) this.setRotate(90);
+
+        this.setOnMouseDragged(event -> {
+            this.mouseX = event.getSceneX();
+            this.mouseY = event.getSceneY();
+            setLayoutX(this.mouseX);
+            setLayoutX(this.mouseY);
+            this.visualBoard.highlightNearestRug(mouseX, mouseY, isVertical, colour);
+
+        });
+
+        this.setOnMousePressed(event -> {
+            this.mouseX = event.getSceneX();
+            this.mouseY = event.getSceneY();
+            snapToPosition();
+        });
+
     }
 
-    public double distance(double x, double y) {
-        double deltaX = this.getLayoutX() - x;
-        double deltaY = this.getLayoutY() - y;
-        return Math.sqrt(deltaX*deltaX+deltaY*deltaY);
-    }
 
-
-    public class DraggableRug extends VisualRug {
-
-        private double mouseX;
-        private double mouseY;
-
-        /* Fields to store information about nearestMove and board position */
-
-        private Marrakech marrakech;
-
-        private VisualBoard visualBoard;
-
-
-
-
-        public DraggableRug(Rug rug) {
-            super(rug);
-
-            this.setOnMousePressed(event -> {
-                this.mouseX = event.getSceneX();
-                this.mouseY = event.getSceneY();
-                toFront();
-            });
-
-            this.setOnMouseDragged(event -> {
-                double deltaX = event.getSceneX() - this.mouseX;
-                double deltaY = event.getSceneY() - this.mouseY;
-                setLayoutX(getLayoutX() + deltaX);
-                setLayoutY(getLayoutY() + deltaY);
-                this.mouseX = event.getSceneX();
-                this.mouseY = event.getSceneY();
-//                board.highlightNearestTriangle(this.getLayoutX(), this.getLayoutY());
-            });
-
-            this.setOnMouseReleased(event -> {
-//                Triangle nearestTriangle = this.board.findNearestTriangle(this.getLayoutX(), this.getLayoutY());
-//                this.setRotate(nearestTriangle.getRotate());
-//                this.setLayoutX(nearestTriangle.getLayoutX());
-//                this.setLayoutY(nearestTriangle.getLayoutY());
-            });
+    /**
+     * Rotates the visualRug on the screen.
+     */
+    public void rotate() {
+        if (this.isVertical) {
+            this.setRotate(90);
+            this.isVertical = false;
+        } else {
+            this.setRotate(0);
+            this.isVertical = true;
         }
     }
+
+    public void snapToPosition() {
+        List<VisualBoard.Square> nearestSquares = this.visualBoard.findNearestRug(mouseX,mouseY,isVertical);
+        VisualBoard.Square square = nearestSquares.get(0);
+        this.setLayoutX(square.getLayoutX());
+        this.setLayoutY(square.getLayoutY());
+    }
+
+
+
+
 }
