@@ -17,8 +17,6 @@ public class VisualBoard extends Group {
 
     private ArrayList<Square> boardSquares;
 
-
-
     private static final int sidelength = 80;
 
     class Square extends Rectangle {
@@ -31,20 +29,20 @@ public class VisualBoard extends Group {
             setStrokeWidth(2);
         }
 
-        private double distance(double x, double y) {
-            double deltaX = this.getLayoutY() - x;
-            double deltaY = this.getLayoutY() - y;
-            return Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+        private boolean intPairEqualsSquare(IntPair position) {
+            return (position.getX() * sidelength == this.getLayoutX() && position.getY() * sidelength == this.getLayoutY());
         }
 
 
         public void highlight(Colour colour) {
             Color color = colourToColor(colour);
             this.setFill(color);
+            this.setOpacity(0.5);
         }
 
         public void dehighlight() {
             this.setFill(Color.rgb(245,228,176));
+            this.setOpacity(1);
         }
     }
 
@@ -66,6 +64,7 @@ public class VisualBoard extends Group {
             }
         }
         this.getChildren().addAll(boardSquares);
+
 
 
     }
@@ -93,38 +92,53 @@ public class VisualBoard extends Group {
         }
     }
 
-    public void displayAssam(Assam assam) {
-        VisualAssam visualAssam = new VisualAssam(assam);
+//    public void displayAssam(Assam assam) {
+//        VisualAssam visualAssam = new VisualAssam(assam);
+//
+//        double offset;
+//        switch (assam.getDirection()) {
+//            case NORTH: case SOUTH:
+//                offset = 6;
+//                break;
+//            case WEST: case EAST:
+//                offset = 4;
+//                break;
+//            default:
+//                offset = 0;
+//                break;
+//        }
+//
+//        double assamX = assam.getPosition().getX() * sidelength + offset;
+//        double assamY = assam.getPosition().getY() * sidelength;
+//
+//        visualAssam.setLayoutX(assamX);
+//        visualAssam.setLayoutY(assamY);
+//        this.getChildren().add(visualAssam);
+//        visualAssam.toFront();
+//    }
 
-        double offset;
-        switch (assam.getDirection()) {
-            case NORTH: case SOUTH:
-                offset = 6;
-                break;
-            case WEST: case EAST:
-                offset = 4;
-                break;
-            default:
-                offset = 0;
-                break;
+
+    public void highlightNearestRug(IntPair position, boolean isVertical, Colour colour) {
+        // Dehighlight all squares first
+        dehighlightAllSquares();
+
+
+        // Find the nearest square
+        Square nearestSquare = findNearestSquare(position);
+        if (nearestSquare != null) {
+
+            // Highlight the nearest square
+            nearestSquare.highlight(colour);
+
+            // IS VERTICAL TO FIND SECOND SQUARE
+            IntPair other = isVertical ? new IntPair(position.getX(), position.getY()+1) :  new IntPair(position.getX()+1, position.getY());
+            Square otherSquare = findNearestSquare(other);
+            if (otherSquare != null) {
+                otherSquare.highlight(colour);
+            }
         }
-
-        double assamX = assam.getPosition().getX() * sidelength + offset;
-        double assamY = assam.getPosition().getY() * sidelength;
-
-        visualAssam.setLayoutX(assamX);
-        visualAssam.setLayoutY(assamY);
-
-
-        this.getChildren().add(visualAssam);
     }
 
-    public void highlightNearestRug(double x, double y, boolean isVertical, Colour colour) {
-        List<Square> squaresToHighlight = findNearestRug(x, y, isVertical);
-        for (Square square : squaresToHighlight) {
-            square.highlight(colour);
-        }
-    }
 
     public void dehighlightAllSquares() {
         for (Square square : this.boardSquares) {
@@ -132,35 +146,19 @@ public class VisualBoard extends Group {
         }
     }
 
-    public List<Square> findNearestRug(double x, double y, boolean isVertical) {
-        List<Square> rugSquares = new ArrayList<>();
-        Square nearestSquare = this.boardSquares.get(0);
-        for (Square square : this.boardSquares) {
-            if (square.distance(x,y) < nearestSquare.distance(x,y)) {
-                nearestSquare = square;
-            }
-        }
 
-        double nearestSquareX = nearestSquare.getLayoutX();
-        double nearestSquareY = nearestSquare.getLayoutY();
-        double otherSquareX;
-        double otherSquareY;
-        if (isVertical) {
-            otherSquareX = nearestSquareX;
-            otherSquareY = nearestSquareY + sidelength;
-        } else {
-            otherSquareX = nearestSquareX + sidelength;
-            otherSquareY = nearestSquareY;
-        }
-        Square otherSquare = null;
-        for (Square square : this.boardSquares) {
-            if (square.getLayoutX() == otherSquareX && square.getLayoutY() == otherSquareY) {
-                otherSquare = square;
-                break;
+
+    public Square findNearestSquare(IntPair position) {
+        for (Square square : this.getBoardSquares()) {
+            if (square.intPairEqualsSquare(position)) {
+                return square;
             }
         }
-        rugSquares.add(nearestSquare);
-        rugSquares.add(otherSquare);
-        return rugSquares;
+        return null;
+    }
+
+
+    public ArrayList<Square> getBoardSquares() {
+        return boardSquares;
     }
 }

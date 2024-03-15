@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 
 public class Viewer extends Application {
@@ -48,6 +49,8 @@ public class Viewer extends Application {
     private static Marrakech currentMarrakech;
 
     private static VisualBoard currentBoard;
+
+    private static VisualAssam visualAssam;
 
     private static final AudioClip dieSound = new AudioClip("file:assets/Sounds/rollsound.mp3");
 
@@ -93,17 +96,38 @@ public class Viewer extends Application {
                     setDieImage(rollFinal);
                     assamMoveSound.play();
                     if (currentMarrakech != null && currentMarrakech.getAssam() != null) {
+
+
+
+                        // Visual Rug
+                        Player currentPlayer = currentMarrakech.getCurrentPlayers()[currentMarrakech.getCurrentTurn()];
+                        VisualRug rugToPlace  = new VisualRug(currentPlayer.getColour(), currentBoard,currentMarrakech);
+                        root.getChildren().remove(currentView);
+                        currentView.getChildren().add(rugToPlace);
+                        root.getChildren().add(currentView);
+                        rugToPlace.requestFocus();
+
+
+
+                        // Update Assam and Visual
+
                         currentMarrakech.getAssam().moveAssam(rollFinal);
-                        currentBoard.getChildren().removeIf(node -> node instanceof VisualAssam);
-                        currentBoard.displayAssam(currentMarrakech.getAssam());
+                        visualAssam.setLayoutPosition();
+                        visualAssam.toFront();
+
+                        // Update Scoreboard
+                        updateScoreboard();
 
                     }
-                    rollButton.setDisable(false);
+                    rollButton.setDisable(true);
                     count = 0;
                 }
             }
+
         }
     }
+
+
 
 
     private void setupRollEventHandler() {
@@ -144,9 +168,9 @@ public class Viewer extends Application {
         Group newView  = new Group();
 
 
-        // Constructs the board and adds it to the viewer, (assam is included)
+        // Constructs the board and adds it to the viewer
         currentBoard = new VisualBoard(marrakech.getBoard());
-        currentBoard.displayAssam(marrakech.getAssam());
+
 
         // Calculate the position to center the board
         double boardWidth = currentBoard.getLayoutBounds().getWidth();
@@ -156,6 +180,7 @@ public class Viewer extends Application {
         currentBoard.setLayoutX(boardX);
         currentBoard.setLayoutY(boardY);
         newView.getChildren().add(currentBoard);
+
 
         // Scoreboard for all players
         ArrayList<Scoreboard> scoreboards = new ArrayList<>();
@@ -184,6 +209,7 @@ public class Viewer extends Application {
         rollButton.setGraphic(rollIconV);
         rollButton.setMinSize(100,100);
         rollButton.setMaxSize(100,100);
+        rollButton.setDisable(true);
 
         double rollX = boardX - 250;
         double rollY = boardY + boardHeight / 2;
@@ -214,10 +240,26 @@ public class Viewer extends Application {
         rotateButton.setLayoutY(rotateY);
         newView.getChildren().add(rotateButton);
 
+        // Visual Assam
+        visualAssam = new VisualAssam(currentMarrakech.getAssam());
+        visualAssam.setLayoutPosition();
+        newView.getChildren().add(visualAssam);
+
+
+        // Visual Rug
+        Player currentPlayer = marrakech.getCurrentPlayers()[marrakech.getCurrentTurn()];
+        VisualRug rugToPlace  = new VisualRug(currentPlayer.getColour(), currentBoard, marrakech);
+        newView.getChildren().add(rugToPlace);
+
+
+
 
 
         // Updates to the new view
         root.getChildren().add(newView);
+        rugToPlace.requestFocus();
+        currentBoard.toBack();
+        visualAssam.toFront();
         currentView = newView;
 
     }
@@ -242,18 +284,7 @@ public class Viewer extends Application {
         rotateButton.setOnAction(event -> {
             if (currentMarrakech != null) {
                 currentMarrakech.getAssam().rotateAssam(90);
-                if (currentBoard != null){
-                    currentBoard.getChildren().removeIf(node -> node instanceof VisualAssam);
-                    currentBoard.displayAssam(currentMarrakech.getAssam());
-                }
-            }
-        });
-    }
-
-    private void setupRugRotationHandler() {
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.R) {
-                // visualRug.rotate();
+                visualAssam.setLayoutPosition();
             }
         });
     }
@@ -294,6 +325,14 @@ public class Viewer extends Application {
         }
     }
 
+    public static Button getRollButton() {
+        return rollButton;
+    }
+
+    public static VisualAssam getVisualAssam() {
+        return visualAssam;
+    }
+
     /**
      * Create a basic text field for input and a refresh button.
      */
@@ -323,19 +362,16 @@ public class Viewer extends Application {
         primaryStage.setTitle("Marrakech Viewer");
 
         Scene scene = new Scene(root, VIEWER_WIDTH, VIEWER_HEIGHT);
-
-
-
         root.getChildren().add(controls);
 
-        makeControls();
         setupRollEventHandler();
         setupRotateEventHandler();
-        setupRugRotationHandler();
         initialiseRoller();
 
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
+
 
 }

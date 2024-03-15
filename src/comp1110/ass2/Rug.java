@@ -26,6 +26,20 @@ public class Rug {
         this.head = new IntPair(rugString.substring(5,7));
     }
 
+    /**
+     * Creates a 'Rug' from the closest square position, a boolean checking
+     * if the rug is vertical and the colour of the rug to place.
+     */
+    public Rug(IntPair head, boolean isVertical, Player player) {
+        this.head = head;
+        if (isVertical) {
+            this.tail = new IntPair(head.getX(), head.getY()+1);
+        } else {
+            this.tail = new IntPair(head.getX()+1,head.getY());
+        }
+        this.colour = player.getColour();
+        this.id = player.getRugCount();
+    }
 
     /**
      * Check if a rugString is well-formed in terms of formatting
@@ -54,9 +68,8 @@ public class Rug {
         return true;
     }
 
-    public boolean isVertical() {
-        return true; // todo
-    }
+
+
 
 
 

@@ -132,7 +132,7 @@ public class Marrakech {
      * isGameOver() is run before this function so the assumption is
      * made that game is not yet over.
      */
-    private void cycleTurn() {
+    public void cycleTurn() {
         // Shift the current turn once
         this.currentTurn = (this.currentTurn + 1) % this.numberOfPlayers;
 
@@ -287,6 +287,9 @@ public class Marrakech {
     }
 
     public boolean isPlacementValid(Rug rug) {
+        if (!isRugValid(rug)) {
+            return false;
+        }
         Board currentBoard = this.board;
         Tile[][] surfaceTiles = currentBoard.getSurfaceTiles();
         Assam assam = this.assam;
@@ -362,7 +365,7 @@ public class Marrakech {
         if (playerToPay != null) {
             playerToMakePayment.makePayment(paymentAmount,playerToPay);
         }
-        cycleTurn();
+
     }
 
 
@@ -503,10 +506,6 @@ public class Marrakech {
         }
     }
 
-    public Set<Rug> getAllValidRugs() {
-        return null;
-        // todo
-    }
 
 
     @Override

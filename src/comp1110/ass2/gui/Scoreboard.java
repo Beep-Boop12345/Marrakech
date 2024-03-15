@@ -24,7 +24,7 @@ public class Scoreboard extends Group {
     public Scoreboard(Player player) {
         this.colour = player.getColour();
         this.dirhams = player.getDirhams();
-        this.rugsRemaining = player.getDirhams();
+        this.rugsRemaining = player.getRugCount();
         this.inGame = player.isInGame();
 
 
