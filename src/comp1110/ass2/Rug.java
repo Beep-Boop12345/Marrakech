@@ -70,9 +70,21 @@ public class Rug {
 
 
 
+    public String debugString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Valid Rug");
+        sb.append("\n");
+        sb.append("Head: (" + head.getX() + ", " + head.getY() + ")");
+        sb.append("\n");
+        sb.append("Tail: (" + tail.getX() + ", " + tail.getY() + ")");
+        sb.append("\n");
+        sb.append("ID: " + id);
+        sb.append("\n");
+        sb.append("Colour: " + colour);
+        return sb.toString();
+    }
 
-
-
+// "Valid Rug: (" + closestPosition.getX() + ", " + closestPosition.getY() + ")"
 
     public IntPair getTail() {
         return tail;

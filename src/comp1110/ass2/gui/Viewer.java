@@ -69,8 +69,7 @@ public class Viewer extends Application {
         primaryStage.show();
     }
 
-    public Viewer() { boardTextField = new TextField();
-    }
+    public Viewer() { boardTextField = new TextField(); }
 
 
     /* Code used to animate dice rolls, roll button event handler included */
@@ -97,8 +96,6 @@ public class Viewer extends Application {
                     assamMoveSound.play();
                     if (currentMarrakech != null && currentMarrakech.getAssam() != null) {
 
-
-
                         // Visual Rug
                         Player currentPlayer = currentMarrakech.getCurrentPlayers()[currentMarrakech.getCurrentTurn()];
                         VisualRug rugToPlace  = new VisualRug(currentPlayer.getColour(), currentBoard,currentMarrakech);
@@ -107,13 +104,14 @@ public class Viewer extends Application {
                         root.getChildren().add(currentView);
                         rugToPlace.requestFocus();
 
-
-
                         // Update Assam and Visual
-
                         currentMarrakech.getAssam().moveAssam(rollFinal);
                         visualAssam.setLayoutPosition();
                         visualAssam.toFront();
+                        System.out.println("Assam Position: (" + currentMarrakech.getAssam().getPosition().getX() + ", " + currentMarrakech.getAssam().getPosition().getY() + ")");
+
+                        // Make payment after assam moves
+                        currentMarrakech.makePayment();
 
                         // Update Scoreboard
                         updateScoreboard();
@@ -244,6 +242,8 @@ public class Viewer extends Application {
         visualAssam = new VisualAssam(currentMarrakech.getAssam());
         visualAssam.setLayoutPosition();
         newView.getChildren().add(visualAssam);
+        System.out.println("Assam Position: (" + currentMarrakech.getAssam().getPosition().getX() + ", " + currentMarrakech.getAssam().getPosition().getY() + ")");
+
 
 
         // Visual Rug
@@ -362,6 +362,7 @@ public class Viewer extends Application {
         primaryStage.setTitle("Marrakech Viewer");
 
         Scene scene = new Scene(root, VIEWER_WIDTH, VIEWER_HEIGHT);
+        makeControls();
         root.getChildren().add(controls);
 
         setupRollEventHandler();

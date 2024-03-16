@@ -209,14 +209,7 @@ public class Assam {
 
         int xDistance = Math.abs(other.getX() - assamX);
         int yDistance = Math.abs(other.getY() - assamY);
-
-        if (xDistance == 1 && yDistance == 1) {
-            return false;
-        } else if (xDistance == 1 || yDistance == 1) {
-            return true;
-        }
-
-        return false;
+        return ((xDistance == 0) && (yDistance == 1)) || ((xDistance == 1) && (yDistance == 0));
     }
 
     public IntPair getPosition() {

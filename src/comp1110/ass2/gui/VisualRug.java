@@ -94,10 +94,12 @@ public class VisualRug extends ImageView {
                 IntPair closestPosition = findClosestIntPair();
                 Rug rugMove = new Rug(closestPosition, isVertical, currentPlayer);
                 //  Is Rug Valid IF YES
-                if (marrakech.isPlacementValid(rugMove)) {
+                if (this.marrakech.isPlacementValid(rugMove)) {
+                    System.out.println(rugMove.debugString());
                     this.placed = true;
-                    this.marrakech.cycleTurn();
                     this.marrakech.makePlacement(rugMove);
+                    this.marrakech.cycleTurn();
+
                     getRollButton().setDisable(false);
                     snapToPosition();
                 } else {

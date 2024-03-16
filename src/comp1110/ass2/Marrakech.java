@@ -290,6 +290,7 @@ public class Marrakech {
         if (!isRugValid(rug)) {
             return false;
         }
+
         Board currentBoard = this.board;
         Tile[][] surfaceTiles = currentBoard.getSurfaceTiles();
         Assam assam = this.assam;
