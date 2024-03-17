@@ -18,7 +18,7 @@ public class Player {
     /**
      * Constructor for a player object given a player string
      * eg. Pr00803i, Colour Red, 8 Dirhams, 3 Rugs remaining
-     * @param playerString
+     * @param playerString String representation of the player.
      */
     public Player (String playerString) {
         assert isPlayerStringValid(playerString);
@@ -35,11 +35,11 @@ public class Player {
 
     public Player(int n) {
         switch (n) {
-            case 0: this.colour = Colour.Cyan; break;
-            case 1: this.colour = Colour.Yellow; break;
-            case 2: this.colour = Colour.Red; break;
-            case 3: this.colour = Colour.Purple; break;
-            default: throw new IllegalArgumentException("There is a maximum of 4 players");
+            case 0 -> this.colour = Colour.Cyan;
+            case 1 -> this.colour = Colour.Yellow;
+            case 2 -> this.colour = Colour.Red;
+            case 3 -> this.colour = Colour.Purple;
+            default -> throw new IllegalArgumentException("There is a maximum of 4 players");
         }
         this.dirhams = 30;
         this.rugCount = 15;
@@ -87,11 +87,7 @@ public class Player {
 
         // Check if the last character is 'i' or 'o'
         char inGameChar = playerString.charAt(7);
-        if (inGameChar != 'i' && inGameChar != 'o') {
-            return false;
-        }
-
-        return true;
+        return inGameChar == 'i' || inGameChar == 'o';
     }
 
     public int getDirhams() {
@@ -114,7 +110,13 @@ public class Player {
         return inGame;
     }
 
+
     public void calculateScore(Board board) {
+        int surfaceTilesForPlayer = calculateSurfaceRugs(board);
+        this.score = surfaceTilesForPlayer + this.dirhams;
+    }
+
+    public int calculateSurfaceRugs(Board board) {
         Tile[][] surfaceTiles = board.getSurfaceTiles();
         int surfaceTilesForPlayer = 0;
         for (int x = 0; x < 7; x++) {
@@ -128,7 +130,7 @@ public class Player {
                 }
             }
         }
-        this.score = surfaceTilesForPlayer + this.dirhams;
+        return surfaceTilesForPlayer;
     }
 
 

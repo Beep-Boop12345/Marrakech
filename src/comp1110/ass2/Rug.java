@@ -16,7 +16,7 @@ public class Rug {
     /**
      * Creates a 'Rug' move from a RugString
      * eg. p014445 Purple, Id: 1, Tail: (4,4), Head (4,5);
-     * @param rugString
+     * @param rugString String representation of a rug move.
      */
     public Rug(String rugString) {
         char colourChar = rugString.charAt(0);
@@ -67,24 +67,6 @@ public class Rug {
 
         return true;
     }
-
-
-
-    public String debugString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Valid Rug");
-        sb.append("\n");
-        sb.append("Head: (" + head.getX() + ", " + head.getY() + ")");
-        sb.append("\n");
-        sb.append("Tail: (" + tail.getX() + ", " + tail.getY() + ")");
-        sb.append("\n");
-        sb.append("ID: " + id);
-        sb.append("\n");
-        sb.append("Colour: " + colour);
-        return sb.toString();
-    }
-
-// "Valid Rug: (" + closestPosition.getX() + ", " + closestPosition.getY() + ")"
 
     public IntPair getTail() {
         return tail;

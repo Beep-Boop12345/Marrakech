@@ -21,7 +21,7 @@ public class Scoreboard extends Group {
 
     private boolean inGame;
 
-    public Scoreboard(Player player) {
+    public Scoreboard(Player player, boolean gameOverScoreboard, Board board) {
         this.colour = player.getColour();
         this.dirhams = player.getDirhams();
         this.rugsRemaining = player.getRugCount();
@@ -47,6 +47,12 @@ public class Scoreboard extends Group {
         String inGameString = this.inGame ? "Yes" : "No";
         String playerInformation = "Dirhams: " + dirhamString + " | " + "Rugs left: " + rugsLeftString + " | "
                                  + "In-game: " + inGameString;
+        if (gameOverScoreboard) {
+            String surfaceRugs = " | Surface-Rugs: " + player.calculateSurfaceRugs(board);
+            player.calculateScore(board);
+            String totalScore = " | Total-Score: " + player.getScore();
+            playerInformation = playerInformation + surfaceRugs + totalScore;
+        }
         Text playerInfo = new Text(30,15,playerInformation);
         Font infoFont = Font.font("Calibri",12);
         playerInfo.setFont(infoFont);

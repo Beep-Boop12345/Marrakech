@@ -12,15 +12,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
-
 import javafx.scene.media.AudioClip;
 import javafx.stage.Stage;
 
 
 import java.util.ArrayList;
-import java.util.Stack;
+
 
 
 public class Viewer extends Application {
@@ -75,9 +73,9 @@ public class Viewer extends Application {
     /* Code used to animate dice rolls, roll button event handler included */
     private class Roller extends AnimationTimer {
 
-        private long FRAMES_PER_SEC = 50L;
-        private long INTERVAL = 1000000000L / FRAMES_PER_SEC;
-        private int MAX_ROLLS = 30;
+        private final long FRAMES_PER_SEC = 50L;
+        private final long INTERVAL = 1000000000L / FRAMES_PER_SEC;
+        private final int MAX_ROLLS = 30;
 
         private long last = 0;
         private int count = 0;
@@ -115,6 +113,14 @@ public class Viewer extends Application {
 
                         // Update Scoreboard
                         updateScoreboard();
+
+                        // Check if the game is over
+                        if (currentMarrakech.isGameOver()) {
+                            Gameover.display(currentMarrakech);
+                            closeViewerWindow();
+                        }
+
+
 
                     }
                     rollButton.setDisable(true);
@@ -186,7 +192,7 @@ public class Viewer extends Application {
         int radius = 20;
         Player[] currentPlayers = marrakech.getCurrentPlayers();
         for (int i = 0; i < currentPlayers.length; i++) {
-            Scoreboard scoreboard = new Scoreboard(currentPlayers[i]);
+            Scoreboard scoreboard = new Scoreboard(currentPlayers[i], false, currentMarrakech.getBoard());
             double scoreboardHeight = scoreboard.getLayoutBounds().getHeight();
             double scoreBoardY = (boardY + radius + 150) + (1.5 * scoreboardHeight * i);
             scoreboard.setLayoutX(scoreBoardX);
@@ -242,17 +248,11 @@ public class Viewer extends Application {
         visualAssam = new VisualAssam(currentMarrakech.getAssam());
         visualAssam.setLayoutPosition();
         newView.getChildren().add(visualAssam);
-        System.out.println("Assam Position: (" + currentMarrakech.getAssam().getPosition().getX() + ", " + currentMarrakech.getAssam().getPosition().getY() + ")");
-
-
 
         // Visual Rug
         Player currentPlayer = marrakech.getCurrentPlayers()[marrakech.getCurrentTurn()];
         VisualRug rugToPlace  = new VisualRug(currentPlayer.getColour(), currentBoard, marrakech);
         newView.getChildren().add(rugToPlace);
-
-
-
 
 
         // Updates to the new view
@@ -308,7 +308,7 @@ public class Viewer extends Application {
             int radius = 20;
             Player[] currentPlayers = currentMarrakech.getCurrentPlayers();
             for (int i = 0; i < currentPlayers.length; i++) {
-                Scoreboard scoreboard = new Scoreboard(currentPlayers[i]);
+                Scoreboard scoreboard = new Scoreboard(currentPlayers[i], false,  currentMarrakech.getBoard());
                 double scoreboardHeight = scoreboard.getLayoutBounds().getHeight();
                 double scoreBoardY = (boardY + radius + 150) + (1.5 * scoreboardHeight * i);
                 scoreboard.setLayoutX(scoreBoardX);
@@ -331,6 +331,14 @@ public class Viewer extends Application {
 
     public static VisualAssam getVisualAssam() {
         return visualAssam;
+    }
+
+    /**
+     * Closes the current viewer window used for Game over
+     * @author u7330006 */
+    private void closeViewerWindow() {
+        Stage stage = (Stage) root.getScene().getWindow();
+        stage.close();
     }
 
     /**

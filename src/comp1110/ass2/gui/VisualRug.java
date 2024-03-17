@@ -6,8 +6,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 
 import static comp1110.ass2.gui.Viewer.getRollButton;
-import static comp1110.ass2.gui.Viewer.getVisualAssam;
-
 
 public class VisualRug extends ImageView {
     private Image rugImage;
@@ -51,18 +49,10 @@ public class VisualRug extends ImageView {
 
     private void setRugImage() {
         switch (this.colour) {
-            case Red -> {
-                rugImage = new Image("file:assets/Images/rugs/red.jpg",80,160,false,true);
-            }
-            case Purple -> {
-                rugImage = new Image("file:assets/Images/rugs/purple.jpg",80,160,false,true);
-            }
-            case Yellow -> {
-                rugImage = new Image("file:assets/Images/rugs/yellow.jpg",80,160,false,true);
-            }
-            case Cyan -> {
-                rugImage = new Image("file:assets/Images/rugs/cyan.jpg",80,160,false,true);
-            }
+            case Red -> rugImage = new Image("file:assets/Images/rugs/red.jpg",80,160,false,true);
+            case Purple -> rugImage = new Image("file:assets/Images/rugs/purple.jpg",80,160,false,true);
+            case Yellow -> rugImage = new Image("file:assets/Images/rugs/yellow.jpg",80,160,false,true);
+            case Cyan -> rugImage = new Image("file:assets/Images/rugs/cyan.jpg",80,160,false,true);
         }
         this.setImage(rugImage);
     }
@@ -95,7 +85,6 @@ public class VisualRug extends ImageView {
                 Rug rugMove = new Rug(closestPosition, isVertical, currentPlayer);
                 //  Is Rug Valid IF YES
                 if (this.marrakech.isPlacementValid(rugMove)) {
-                    System.out.println(rugMove.debugString());
                     this.placed = true;
                     this.marrakech.makePlacement(rugMove);
                     this.marrakech.cycleTurn();
@@ -166,7 +155,7 @@ public class VisualRug extends ImageView {
         if (isVertical) {
             layoutX = nearestSquare.getLayoutX()+boardLayoutX;
             layoutY = nearestSquare.getLayoutY()+boardLayoutY;
-        } else {;
+        } else {
             layoutX = nearestSquare.getLayoutX()+boardLayoutX + sidelength/2;
             layoutY = nearestSquare.getLayoutY()+boardLayoutY - sidelength/2;
 
