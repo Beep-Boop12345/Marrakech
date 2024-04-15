@@ -1,5 +1,5 @@
 # Marrakech Project
-This repository is based on work I did for the ANU course COMP1110 Assignment.
+This repository is based on work I did for an ANU course.
 
 
 ## Problem Description - Marrakech
